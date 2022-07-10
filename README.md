@@ -1,4 +1,6 @@
 # Pyspark and Scala Experiment
+
+## Idea
 The simple idea is to create a machine learning platform that can have two backends: local Python and PySpark/Scala. More specifically, I want to find a way to expose Scala classes and functions to the frontend Jupyter Notebook directly. Something like this:
 
 **Case 1** Using Python backend which is the default and it should utilize the local resources such as CPU and/or GPU
@@ -38,3 +40,11 @@ param = {
 xgb_model = XGBoostClassifier(MAP(param)).fit(data_train) # A scala object
 
 ``` 
+
+## Notes
+### HDFS setup
+I followed this [link](https://kontext.tech/article/445/install-hadoop-330-on-windows-10-using-wsl) to set up my local single-node HDFS
+### Spark setup
+To be updated
+### PySpark and Scala setup
+To be updated
