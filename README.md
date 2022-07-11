@@ -68,3 +68,5 @@ To be updated
 * Start YARN daemon `~/hadoop/hadoop-3.3.0$ sbin/start-yarn.sh`
 * Stop DFS daemon `~/hadoop/hadoop-3.3.0$ sbin/stop-dfs.sh`
 * Stop YARN daemon `~/hadoop/hadoop-3.3.0$ sbin/stop-yarn.sh`
+* Spark Shell `$ spark-shell`
+* Jupyter Lab/Notebook without broweser error message in WSL `$ jupyter lab --no-browser`
