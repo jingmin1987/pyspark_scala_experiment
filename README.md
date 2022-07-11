@@ -44,7 +44,27 @@ xgb_model = XGBoostClassifier(MAP(param)).fit(data_train) # A scala object
 ## Notes
 ### HDFS setup
 I followed this [link](https://kontext.tech/article/445/install-hadoop-330-on-windows-10-using-wsl) to set up my local single-node HDFS
+* Default DFS UI: http://localhost:9870/dfshealth.html#tab-overview
+* Default YARN UI: http://localhost:8088/cluster
 ### Spark setup
-To be updated
+I mainly followed this [link](https://kontext.tech/article/560/apache-spark-301-installation-on-linux-guide). However, a few links need to be updated accordingly
+* The link to spark download returns 404 now. I've updated it to
+```bash
+wget https://dlcdn.apache.org/spark/spark-3.3.0/spark-3.3.0-bin-hadoop3.tgz
+```
+* All the following commands need to point to a slightly different location due to above change
+* To run example. you should execute the below updated command instead
+```bash
+$SPARK_HOME/bin/run-example SparkPi 10
+```
+* Default SparkUI http://localhost:4040
+* Default history server http://localhost:18080
 ### PySpark and Scala setup
 To be updated
+
+## Cheatsheet for HDFS and Spark
+* Start DFS daemon `~/hadoop/hadoop-3.3.0$ sbin/start-dfs.sh`
+* Check Java Process `jps`
+* Start YARN daemon `~/hadoop/hadoop-3.3.0$ sbin/start-yarn.sh`
+* Stop DFS daemon `~/hadoop/hadoop-3.3.0$ sbin/stop-dfs.sh`
+* Stop YARN daemon `~/hadoop/hadoop-3.3.0$ sbin/stop-yarn.sh`
