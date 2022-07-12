@@ -65,6 +65,9 @@ Scala: because I am using IntelliJ, so I only need to
 * Install JDK 1.8+
 * Install Scala plugin for Intellij
 * Config framework and SDK for the project
+* To compile as JAR in Intellij, one can add an JAR artifact under File -> Project Structure and then build the 
+  artifact
+* To test the JAR file, one can run `java -cp out/.../scala_test.jar test.Hello`
 ## Cheatsheet for HDFS and Spark
 * Start DFS daemon `~/hadoop/hadoop-3.3.0$ sbin/start-dfs.sh`
 * Check Java Process `jps`

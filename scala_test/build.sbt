@@ -1,9 +1,9 @@
-ThisBuild / version := "0.1.0-SNAPSHOT"
+version := "0.1.0-SNAPSHOT"
 
-ThisBuild / scalaVersion := "2.13.8"
+scalaVersion := "2.13.8"
 
-lazy val root = (project in file("."))
-  .settings(
-    name := "scala_test",
-    idePackagePrefix := Some("org.scala_test")
-  )
+name := "scala_test"
+
+libraryDependencies += "org.scala-lang" % "scala-library" % "2.13.8"
+
+libraryDependencies += "org.apache.spark" %% "spark-core" % "3.3.0"
