@@ -60,8 +60,11 @@ $SPARK_HOME/bin/run-example SparkPi 10
 * Default SparkUI http://localhost:4040
 * Default history server http://localhost:18080
 ### PySpark and Scala setup
-To be updated
-
+Pyspark: just `pip install pyspark`
+Scala: because I am using IntelliJ, so I only need to 
+* Install JDK 1.8+
+* Install Scala plugin for Intellij
+* Config framework and SDK for the project
 ## Cheatsheet for HDFS and Spark
 * Start DFS daemon `~/hadoop/hadoop-3.3.0$ sbin/start-dfs.sh`
 * Check Java Process `jps`
