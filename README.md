@@ -76,3 +76,5 @@ Scala: because I am using IntelliJ, so I only need to
 * Stop YARN daemon `~/hadoop/hadoop-3.3.0$ sbin/stop-yarn.sh`
 * Spark Shell `$ spark-shell`
 * Jupyter Lab/Notebook without browser error message in WSL `$ jupyter lab --no-browser`
+## Useful links
+https://www.waitingforcode.com/pyspark/pyspark-jvm-introduction-1/read
