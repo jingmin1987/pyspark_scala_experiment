@@ -55,6 +55,14 @@ xgb_model = XGBoostClassifier(MAP(param)).fit(data_train) # A scala object
 * Need to think if I should create a custom data wrapper class that is the output by `transform()`.
 * Unit test
 * Need to think about if I have to implement anything on the Scala side or just import the original XGB jar
+## Project Structure
+root // README, etc.  
+|--config // config files including spark parameters, environment variables, etc.  
+|--estimator // implementation of various algorithms for modeling
+|--note4book // store notebooks (nbserver entry point)  
+|--utility // functions for reporting, dataframe transformation, testing, ect.  
+|--test // unit test
+
 
 ## Notes
 ### HDFS setup
