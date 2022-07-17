@@ -40,6 +40,21 @@ param = {
 xgb_model = XGBoostClassifier(MAP(param)).fit(data_train) # A scala object
 
 ``` 
+## Project Design
+* Same API regardless of backend. This is explained in the above examples which I will update along the way
+* Class hierarchy for both Scala and Python implementations
+  * The basic abstract class or trait should be called Model, which requires further implementation of below methods
+    * `transform(df: DataFrame)` this expects a spark or pandas dataframe, and transform it to whatever required by 
+      underlying algo
+    * `fit(args)` args should be something output by `transform()`, and returns a Model (however, I will examine 
+      popular implementations of `fit()` to be consistent)
+    * `predict(args)` takes something output by `transform()`, and returns the prediction, likely in the same format
+  * For now, most of the class implementation will happen on the python side, with base Scala classes imported using 
+    `py4j`. For instance, I will try importing scala xgb directly via `py4j` and wrap it in the XGBClassifier python 
+    class
+* Need to think if I should create a custom data wrapper class that is the output by `transform()`.
+* Unit test
+* Need to think about if I have to implement anything on the Scala side or just import the original XGB jar
 
 ## Notes
 ### HDFS setup
