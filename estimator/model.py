@@ -5,15 +5,15 @@ class Model(metaclass=ABCMeta):
     """Abstract class indicating an algorithm"""
 
     @abstractmethod
-    def transform(self):
+    def transform(self, x, y):
         pass
 
     @abstractmethod
-    def fit(self):
+    def fit(self, x, y, *args, **kwargs):
         pass
 
     @abstractmethod
-    def predict(self):
+    def predict(self, x, **kwargs):
         pass
 
 
