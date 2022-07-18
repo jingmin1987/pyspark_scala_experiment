@@ -47,10 +47,10 @@ class XGBClassifierPython(xgb.XGBClassifier, Model):
         :return: two pandas dataframes or series
         """
         df_x, df_y = x, y
-        if not isinstance(df_x, pd.DataFrame):
+        if not isinstance(df_x, (pd.DataFrame, pd.Series)):
             df_x = pd.DataFrame(df_x)
 
-        if not isinstance(df_y, pd.DataFrame):
+        if not isinstance(df_y, (pd.DataFrame, pd.Series)):
             df_y = pd.DataFrame(df_y)
 
         return df_x, df_y
