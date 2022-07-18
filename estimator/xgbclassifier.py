@@ -7,7 +7,7 @@ class XGBClassifier(ModelGateway):
     """A utility class to create XGB model objects """
 
     @classmethod
-    def make(cls, backend='python', spark=None, **kwargs):
+    def make(cls, *, backend='python', spark=None, **kwargs):
         """
         Creates a XGB classifier object with either Python or Scala backend
 
@@ -23,7 +23,7 @@ class XGBClassifier(ModelGateway):
         else:
             raise Exception('Backend not supported. Please choose either "python" or "scala"')
 
-# TODO: keyword binding so no extra keyword is supplied
+
 class XGBClassifierPython(xgb.XGBClassifier, Model):
     """A simple wrapper of the original XGBClassifier"""
 
