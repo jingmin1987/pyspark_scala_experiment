@@ -90,6 +90,8 @@ class XGBClassifierPython(xgb.XGBClassifier, Model):
 
 
 class XGBClassifierScala(Model):
+    """ A class represents XGB implementation in Scala"""
+
     def __init__(self, **kwargs):
         self.connection = JVMConnection.get_active()
         xgb_param = self.connection.util.toMap(kwargs)
@@ -97,6 +99,13 @@ class XGBClassifierScala(Model):
         self._model = None
 
     def transform(self, labeled_data: DataFrame, features: list, label: str):
+        """
+        Vectorizes the pyspark dataframe so it can be consumed directly by .fit() and .predict()
+        :param labeled_data:
+        :param features:
+        :param label:
+        :return:
+        """
         vector_assembler = VectorAssembler(
             inputCols=features,
             outputCol='features'
@@ -104,11 +113,22 @@ class XGBClassifierScala(Model):
         return vector_assembler.transform(labeled_data).select('features', label)
 
     def fit(self, vector_data: DataFrame):
+        """
+        Fits the classifer on the data and returns itself
+        :param vector_data:
+        :return: itself
+        """
         self._model = self._clf.fit(vector_data._jdf)
         return self
 
     def predict(self, vector_data: DataFrame):
-        return self._model.transform(vector_data._jdf)
+        """
+        Batch prediction. Returns a pyspark dataframe
+        :param vector_data:
+        :return:
+        """
+        java_df = self._model.transform(vector_data._jdf)
+        return DataFrame(java_df, self.connection.spark)
 
     def set_features_col(self, col_name: str):
         self._clf.setFeaturesCol(col_name)
