@@ -33,7 +33,7 @@ class JVMConnection:
 
         self.spark = spark
         for model, package in INSTALLED_MODELS.items():
-            java_import(self.spark, package)
+            java_import(self.jvm, package)
 
     @property
     def jvm(self):
