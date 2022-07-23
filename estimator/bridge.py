@@ -1,4 +1,10 @@
 from pyspark.sql import SparkSession
+from py4j.java_gateway import java_import
+
+
+INSTALLED_MODELS = {
+    'XGBClassifier': 'ml.dmlc.xgboost4j.scala.spark.XGBoostClassifier'
+}
 
 
 class JVMConnection:
@@ -26,6 +32,8 @@ class JVMConnection:
             spark = SparkSession.builder.getOrCreate()
 
         self.spark = spark
+        for model, package in INSTALLED_MODELS.items():
+            java_import(self.spark, package)
 
     @property
     def jvm(self):
@@ -33,4 +41,4 @@ class JVMConnection:
 
     @property
     def util(self):
-        return self.jvm.jz.scala.util
+        return self.jvm.jz.scala.util.Conversion

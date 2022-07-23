@@ -1,6 +1,9 @@
 import xgboost as xgb
 import pandas as pd
+from pyspark.ml.feature import VectorAssembler
+from pyspark.sql import DataFrame
 from estimator.model import Model, ModelGateway
+from estimator.bridge import JVMConnection, INSTALLED_MODELS
 
 
 class XGBClassifier(ModelGateway):
@@ -19,9 +22,15 @@ class XGBClassifier(ModelGateway):
         if backend.lower() == 'python':
             return XGBClassifierPython(**kwargs)
         elif backend.lower() == 'scala':
+            if cls.__name__ not in INSTALLED_MODELS:
+                raise NotImplementedError(f'No Scala package installed for {cls.__name__}')
+            if not spark:
+                # Log warning
+                pass
+            JVMConnection.set_spark(spark)
             return XGBClassifierScala(**kwargs)
         else:
-            raise Exception('Backend not supported. Please choose either "python" or "scala"')
+            raise Exception(f'Backend {backend.lower()} not supported. Please choose either "python" or "scala"')
 
 
 class XGBClassifierPython(xgb.XGBClassifier, Model):
@@ -79,5 +88,22 @@ class XGBClassifierPython(xgb.XGBClassifier, Model):
 
 
 class XGBClassifierScala(Model):
-    pass
+    def __init__(self, **kwargs):
+        self.connection = JVMConnection.get_active()
+        xgb_param = self.connection.util.toMap(kwargs)
+        self.clf = self.connection.jvm.XGBoostClassifier(xgb_param)
+        self.model = None
 
+    def transform(self, labeled_data: DataFrame, features: list, label: str):
+        vector_assembler = VectorAssembler(
+            inputCols=features,
+            outputCol='features'
+        )
+        return vector_assembler.transform(labeled_data).select('features', label)
+
+    def fit(self, vector_data: DataFrame):
+        self.model = self.clf.fit(vector_data._jdf)
+        return self.model
+
+    def predict(self, vector_data: DataFrame):
+        return self.model.transform(vector_data._jdf)
