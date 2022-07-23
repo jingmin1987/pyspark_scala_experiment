@@ -1,4 +1,6 @@
-/.idea
+.idea
 .ipynb_checkpoints/
 /scala_test/.idea
 __pycache__
+production
+META-INF
