@@ -24,10 +24,12 @@ class XGBClassifier(ModelGateway):
         elif backend.lower() == 'scala':
             if cls.__name__ not in INSTALLED_MODELS:
                 raise NotImplementedError(f'No Scala package installed for {cls.__name__}')
-            if not spark:
-                # Log warning
-                pass
-            JVMConnection.set_spark(spark)
+
+            if not JVMConnection.is_spark_set():
+                if not spark:
+                    # Log warning
+                    pass
+                JVMConnection.set_spark(spark)
             return XGBClassifierScala(**kwargs)
         else:
             raise Exception(f'Backend {backend.lower()} not supported. Please choose either "python" or "scala"')
@@ -91,8 +93,8 @@ class XGBClassifierScala(Model):
     def __init__(self, **kwargs):
         self.connection = JVMConnection.get_active()
         xgb_param = self.connection.util.toMap(kwargs)
-        self.clf = self.connection.jvm.XGBoostClassifier(xgb_param)
-        self.model = None
+        self._clf = self.connection.jvm.XGBoostClassifier(xgb_param)
+        self._model = None
 
     def transform(self, labeled_data: DataFrame, features: list, label: str):
         vector_assembler = VectorAssembler(
@@ -102,8 +104,16 @@ class XGBClassifierScala(Model):
         return vector_assembler.transform(labeled_data).select('features', label)
 
     def fit(self, vector_data: DataFrame):
-        self.model = self.clf.fit(vector_data._jdf)
-        return self.model
+        self._model = self._clf.fit(vector_data._jdf)
+        return self
 
     def predict(self, vector_data: DataFrame):
-        return self.model.transform(vector_data._jdf)
+        return self._model.transform(vector_data._jdf)
+
+    def set_features_col(self, col_name: str):
+        self._clf.setFeaturesCol(col_name)
+        return self
+
+    def set_label_col(self, col_name: str):
+        self._clf.setLabelCol(col_name)
+        return self

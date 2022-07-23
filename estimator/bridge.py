@@ -1,3 +1,4 @@
+import py4j.java_gateway
 from pyspark.sql import SparkSession
 from py4j.java_gateway import java_import
 
@@ -13,6 +14,17 @@ class JVMConnection:
     """
 
     _active_connection = None
+
+    @classmethod
+    def is_spark_set(cls):
+        """
+        Tells if a SparkSession is set
+        :return: status
+        """
+        if cls._active_connection:
+            return True
+        else:
+            return False
 
     @classmethod
     def set_spark(cls, spark: SparkSession):
@@ -66,6 +78,17 @@ class JVMConnection:
         :return: None
         """
         process = self.jvm.Runtime.getRuntime().exec(script).getInputStream()
-        buffer = self.jvm.io.BufferedReader(self.jvm.io.InputStreamReader(process))
-        while self.jvm.System.out.println(buffer.readLine()):
-            pass
+        buffer = self.jvm.java.io.BufferedReader(self.jvm.java.io.InputStreamReader(process))
+        lines = list()
+        lines.append(buffer.readLine())
+        while lines and lines[-1]:
+            lines.append(buffer.readLine())
+        print('\n'.join(lines[:-1]))
+
+    def java_print(self, java_object: py4j.java_gateway.JavaObject):
+        """
+        Prints Java stuff in python
+        :param java_object:
+        :return:
+        """
+        self.jvm.System.out.println(java_object)
