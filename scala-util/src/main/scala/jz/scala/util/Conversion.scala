@@ -1,13 +1,13 @@
 package jz.scala.util
 
 import java.util
-import java.util.{List => JList}
-import java.util.{Map => JMap}
+import java.util.{List => JList, Map => JMap, Set => JSet}
 import scala.collection.JavaConverters._
 
 object Conversion {
   def toSeq[A](pythonList: JList[A]): Seq[A] = pythonList.asScala
   def toMap[A, B](pythonMap: JMap[A, B]): Map[A, B] = pythonMap.asScala.toMap
+  def toSet[A](pythonSet: JSet[A]): Set[A] = pythonSet.asScala.toSet
 
   def testSeq():Seq[Int] = {
     val javaArrayList = new util.ArrayList[Int](Seq(1, 2).asJava)
@@ -25,8 +25,17 @@ object Conversion {
     toMap(javaMap)
   }
 
+  def testSet(): Set[Int] = {
+    val javaSet = new java.util.HashSet[Int]()
+    javaSet.add(1)
+    javaSet.add(2)
+    javaSet.add(1)
+    toSet(javaSet)
+  }
+
   def main(args: Array[String]): Unit = {
     println(testSeq())
     println(testMap())
+    println(testSet())
   }
 }
