@@ -1,70 +1,120 @@
-# Pyspark and Scala Experiment
+# Pyspark and Spark Experiment
 
 ## Idea
-The simple idea is to create a machine learning platform that can have two backends: local Python and PySpark/Scala. More specifically, I want to find a way to expose Scala classes and functions to the frontend Jupyter Notebook directly. Something like this:
+It came to my attention that my team's current work flow is segmented due to various constraints
+* Preprocessing happens in Python and PySpark.
+* Model training is written in Scala and run on Spark using spark-submit.
+* Mainly rely on grid search for hyperparameter tuning due to inconvenience of visualizing the parameter space while 
+  running the model
+* Performance reporting and other postprocessing are in Python and Pyspark.
+ 
+Therefore, the idea of streamlining model training onto one platform (e.g. Jupyter) and make it more 
+enjoyable/interactive is the core motivation to have this toy project. Ideally, user should have almost seamless 
+experience when switching between Python and Spark backend. Gradually more functionality could be implemented on demand.
 
-**Case 1** Using Python backend which is the default and it should utilize the local resources such as CPU and/or GPU
+The realization of the idea is to leverage `py4j` and implement the wrapper of xgboost-spark on the Python side. 
+After I completed the MVP of the project, I found out that similar projects are already available and were developed 
+a long time ago. Anyway, I think it is a good fun project and the way I implemented it is a bit different, not 
+necessary better though ; ) 
+
+**Example 1** Using Python backend which is the default, and it should utilize the local resources such as CPU 
+and/or GPU
 ```python
-from backend import BackendConfig # This is optional since it does not do anything
-import numpy as np
 import pandas as pd
-from sklearn.ensemble import GradientBoostingClassifier
+import optuna
+from sklearn.datasets import make_classification
+from sklearn.model_selection import train_test_split
 
+from estimator.xgbclassifier import XGBClassifier
 
-data = pd.read_csv('my_file.csv', header=True)
-gbt_model = GradientBoostingClassifier()
-gbt_model.fit(data['X'], data['Y'])
-
-# Of course, someone should still be able to use Spark in conjunction with Python
-data2 = spark.read.parquet("/tenants/tenant1/dataset/pii/shared/my_data.parquet").toPandas()
-gbt_model.fit(data2['X'], data2['Y'])
-
-``` 
-**Case 2** Using Scala backend which should utilize the cluster resources
-```python
-from backend import BackendConfig
-from backend.scala.algo import XGBoostClassifier
-from backend.scala.udf import MAP, VectorAssembler
-
-
-BackendConfig.set_backend('scala')
-BackendConfig.set_spark(spark=spark) # This should extract both sparkContext and active JVM
-data2 = spark.read.parquet("/tenants/tenant1/dataset/pii/shared/my_data.parquet")
-data_train = VectorAssembler(data=data_2, input_cols=data_2.columns, output_cols='features')
-param = {
-    'eta': 0.1,
-    'missing': -999,
-    'objective': 'multi:softprob',
-    'num_class': 3
+# Global vars
+SEED = 123
+FIXED_PARAM = {
+  'eval_metric': 'auc',
 }
-xgb_model = XGBoostClassifier(MAP(param)).fit(data_train) # A scala object
+
+# Create fake data
+x, y = make_classification(n_samples=10_000)
+x = pd.DataFrame(data=x, columns=[f'feature_{i}' for i in range(x.shape[1])])
+x_train, x_valid, y_train, y_valid = train_test_split(x, y, train_size=0.7, random_state=SEED)
+
+# Create XGBoost classifier python model
+def objective(trial):
+  global FIXED_PARAM, x_train, x_valid, y_train, y_valid
+  param = {
+    'learning_rate': trial.suggest_float('learning_rate', 1e-8, 1.0, log=True)
+  }
+
+  python_clf = XGBClassifier.make(**FIXED_PARAM, **param)
+  return python_clf.fit(x_train, y_train, eval_set=[(x_valid, y_valid)], verbose=False).best_score
+
+# And optimize hyperparameters in Python
+study = optuna.create_study(direction="maximize")
+study.optimize(objective, n_trials=100)
+``` 
+**Example 2** Using Spark backend which should utilize the cluster resources
+```python
+import pandas as pd
+import optuna
+from sklearn.datasets import make_classification
+from sklearn.model_selection import train_test_split
+
+from pyspark.sql import SparkSession
+
+from estimator.xgbclassifier import XGBClassifier
+
+# Global vars
+SEED = 123
+FIXED_PARAM = {
+  'eval_metric': 'auc',
+}
+
+# Spark if there's none
+spark = SparkSession.builder.appName('my_test').config('spark.jars', '../jar/scala-util.jar,../jar/xgboost4j_2.12-1.6.1.jar,../jar/xgboost4j-spark_2.12-1.6.1.jar').getOrCreate()
+
+# Create fake data
+x, y = make_classification(n_samples=10_000)
+x = pd.DataFrame(data=x, columns=[f'feature_{i}' for i in range(x.shape[1])])
+xy = x.assign(label=y)
+xy_train, xy_valid = map(spark.createDataFrame, train_test_split(xy, train_size=0.7, random_state=SEED))
+FIXED_PARAM['eval_sets'] = {'eval1': xy_valid}
+FIXED_PARAM['verbose'] = False
+
+# Create XGBoost classifier spark model
+
+def objective(trial):
+  global FIXED_PARAM, x_train, x_valid, y_train, y_valid
+  param = {
+    'learning_rate': trial.suggest_float('learning_rate', 1e-8, 1.0, log=True)
+  }
+
+  spark_clf = XGBClassifier \
+    .make(backend='spark', spark=spark, **FIXED_PARAM, **param)
+
+  vectorized_df = spark_clf.transform(xy_train, xy_train.columns[:-1])
+
+  return float(spark_clf.fit(vectorized_df).booster.getAttr('best_score'))
+
+# And optimize hyperparameters in Python
+study = optuna.create_study(direction="maximize")
+study.optimize(objective, n_trials=100)
 
 ``` 
-## Project Design
-* Same API regardless of backend. This is explained in the above examples which I will update along the way
-* Class hierarchy for both Scala and Python implementations
-  * The basic abstract class or trait should be called Model, which requires further implementation of below methods
-    * `transform(df: DataFrame)` this expects a spark or pandas dataframe, and transform it to whatever required by 
-      underlying algo
-    * `fit(args)` args should be something output by `transform()`, and returns a Model (however, I will examine 
-      popular implementations of `fit()` to be consistent)
-    * `predict(args)` takes something output by `transform()`, and returns the prediction, likely in the same format
-  * For now, most of the class implementation will happen on the python side, with base Scala classes imported using 
-    `py4j`. For instance, I will try importing scala xgb directly via `py4j` and wrap it in the XGBClassifier python 
-    class
-* Need to think if I should create a custom data wrapper class that is the output by `transform()`.
-* Unit test
-* Need to think about if I have to implement anything on the Scala side or just import the original XGB jar
-## Project Structure
-root // README, etc.  
-|--config // config files including spark parameters, environment variables, etc.  
-|--estimator // implementation of various algorithms for modeling
-|--note4book // store notebooks (nbserver entry point)  
-|--utility // functions for reporting, dataframe transformation, testing, ect.  
-|--test // unit test
+## Testing System
+* Spark 3.3.0 - standalone mode
+* Hadoop 3.3.0
+* Scala 2.12
+* Java 1.8
+* Python 3.8
+* Packages - please refer to environment/requirements.txt
+## Notes in Regard to Performance
+* Using spark, `num_workers>1` has significant overhead. For my toy dataset, it is not worth going over 1
+* Using spark with `num_workers=1`, the performance seems about 50% worse than using Python with `n_jobs=8` with the 
+  toy dataset. Supposedly the overhead will become worthwhile once data becomes large enough
+* Hasn't yet tested in a distributed system, but I was forewarned that one should set `--executor-cores` to be 1 
 
 
-## Notes
+## Other Notes
 ### HDFS setup
 I followed this [link](https://kontext.tech/article/445/install-hadoop-330-on-windows-10-using-wsl) to set up my local single-node HDFS
 * Default DFS UI: http://localhost:9870/dfshealth.html#tab-overview
@@ -92,6 +142,7 @@ Scala: because I am using IntelliJ, so I only need to
   artifact
 * To test the JAR file, one can run `java -cp out/.../scala_test.jar test.Hello`
 ## Cheatsheet for HDFS and Spark
+* For some reason I have to constantly `sudo service ssh restart`
 * Start DFS daemon `~/hadoop/hadoop-3.3.0$ sbin/start-dfs.sh`
 * Check Java Process `jps`
 * Start YARN daemon `~/hadoop/hadoop-3.3.0$ sbin/start-yarn.sh`
