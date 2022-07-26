@@ -1,21 +1,22 @@
 # Pyspark and Spark Experiment
 
 ## Why this project?
-I noticed that some team's work flow is segmented as below, mainly duet to constraints in different environments
+I noticed that some team's work flow is segmented as below, mainly due to constraints in different environments
 * Preprocessing happens in Python and PySpark.
 * Model training is written in Scala and run on Spark using spark-submit.
 * Mainly rely on grid search for hyperparameter tuning due to inconvenience of visualizing the parameter space while 
-  running the model
+  running the model using spark-submit
 * Performance reporting and other postprocessing are in Python and Pyspark.
  
 Therefore, the idea of streamlining model training onto one platform (e.g. Jupyter) and make it more 
 enjoyable/interactive is the core motivation to have this toy project. Ideally, user should have almost seamless 
-experience when switching between Python and Spark backend. Gradually more functionality could be implemented on demand.
+experience when switching between Python and Spark backend, with almost the same APIs when building the model. 
+Gradually more functionality could be 
+implemented on demand.
 
 The realization of the idea is to leverage `py4j` and implement the wrapper of xgboost-spark on the Python side. 
-After I completed the MVP of the project, I found out that similar projects are already available and were developed 
-a long time ago. Anyway, I think it is a good fun project and the way I implemented it is a bit different, not 
-necessary better though ; ) 
+This idea is different from what was implemented in `xgboost-pyspark` which utilizes pyspark.ml. Anyway, I 
+think it is a good fun project to implement it in a different way, not necessary better though ; ) 
 
 **Example 1** Using Python backend which is the default, and it should utilize the local resources such as CPU 
 and/or GPU
