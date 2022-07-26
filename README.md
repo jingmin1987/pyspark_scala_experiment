@@ -1,7 +1,7 @@
 # Pyspark and Spark Experiment
 
-## Idea
-It came to my attention that my team's current work flow is segmented due to various constraints
+## Why this project?
+I noticed that some team's work flow is segmented as below, mainly duet to constraints in different environments
 * Preprocessing happens in Python and PySpark.
 * Model training is written in Scala and run on Spark using spark-submit.
 * Mainly rely on grid search for hyperparameter tuning due to inconvenience of visualizing the parameter space while 
