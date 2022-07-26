@@ -4,7 +4,8 @@ from py4j.java_gateway import java_import
 
 
 INSTALLED_MODELS = {
-    'XGBClassifier': 'ml.dmlc.xgboost4j.scala.spark.XGBoostClassifier'
+    'XGBClassifier': 'ml.dmlc.xgboost4j.scala.spark.XGBoostClassifier',
+    'XGBoostClassificationModel': 'ml.dmlc.xgboost4j.scala.spark.XGBoostClassificationModel'
 }
 
 
