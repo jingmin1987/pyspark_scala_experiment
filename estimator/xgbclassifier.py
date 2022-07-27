@@ -6,7 +6,7 @@ from py4j.java_gateway import Py4JJavaError
 
 from estimator.model import Model, ModelGateway
 from estimator.bridge import JVMConnection, INSTALLED_MODELS
-from utility.functions import add_docstring, rename_to_xgb_param, cast_to_scala_type
+from util.functions import add_docstring, rename_to_xgb_param, cast_to_scala_type
 
 XGB_DOC = xgb.sklearn.__estimator_doc + xgb.sklearn.__model_doc
 

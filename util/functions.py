@@ -1,4 +1,4 @@
-import collections
+from collections.abc import Iterable
 
 from estimator.bridge import JVMConnection
 
@@ -15,14 +15,17 @@ def add_docstring(method_name=None, extra_doc=''):
             method = getattr(cls, method_name)
             if type(method).__name__ == 'method':
                 doc = getattr(method.__func__, '__doc__', '')
+                doc = doc or ''
                 doc += extra_doc
                 method.__func__.__doc__ = doc
             elif type(method).__name__ == 'function':
                 doc = getattr(method, '__doc__', '')
+                doc = doc or ''
                 doc += extra_doc
                 method.__doc__ = doc
         else:
             doc = getattr(cls, '__doc__', '')
+            doc = doc or ''
             doc += extra_doc
             cls.__doc__ = doc
         return cls
@@ -31,7 +34,7 @@ def add_docstring(method_name=None, extra_doc=''):
 
 def rename_to_xgb_param(sklearn_param):
     """
-    Helper function to remap params between sklearn api and xgb api
+    Helper function to remap params between sklearn api and xgb api, INPLACE
     :param sklearn_param:
     :return:
     """
@@ -62,7 +65,7 @@ def cast_to_scala_type(item):
     """
     c = JVMConnection.get_active()
 
-    if not isinstance(item, collections.Iterable):
+    if not isinstance(item, Iterable):
         return item
     else:
         if isinstance(item, (list, tuple)):
