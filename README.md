@@ -113,8 +113,9 @@ study.optimize(objective, n_trials=100)
 * Using spark with `num_workers=1`, the performance seems about 50% worse than using Python with `n_jobs=8` with the 
   toy dataset. Supposedly the overhead will become worthwhile once data becomes large enough
 * Hasn't yet tested in a distributed system, but I was forewarned that one should set `--executor-cores` to be 1 
-
-
+* For standalone model, `driver memory` is what matters and may impact how much shuffling there could be
+* Other parameters such as `number of partitions` could be further optimized. But I don't really think it's 
+  necessary for this project
 ## Other Notes
 ### HDFS setup
 I followed this [link](https://kontext.tech/article/445/install-hadoop-330-on-windows-10-using-wsl) to set up my local single-node HDFS
