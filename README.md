@@ -1,6 +1,6 @@
 # Pyspark and Spark Experiment
 
-## Why this project?
+## Why did I create this project?
 I noticed that some team's work flow is segmented as below, mainly due to constraints in different environments
 * Preprocessing happens in Python and PySpark.
 * Model training is written in Scala and run on Spark using spark-submit.
@@ -11,12 +11,12 @@ I noticed that some team's work flow is segmented as below, mainly due to constr
 Therefore, the idea of streamlining model training onto one platform (e.g. Jupyter) and make it more 
 enjoyable/interactive is the core motivation to have this toy project. Ideally, user should have almost seamless 
 experience when switching between Python and Spark backend, with almost the same APIs when building the model. 
-Gradually more functionality could be 
-implemented on demand.
+Gradually more functionality could be implemented on demand.
 
 The realization of the idea is to leverage `py4j` and implement the wrapper of xgboost-spark on the Python side. 
 This idea is different from what was implemented in `xgboost-pyspark` which utilizes pyspark.ml. Anyway, I 
-think it is a good fun project to implement it in a different way, not necessary better though ; ) 
+think it is a good fun project to implement it in a different way, and learn how to program across languages and 
+environments  .
 
 **Example 1** Using Python backend which is the default, and it should utilize the local resources such as CPU 
 and/or GPU
@@ -60,7 +60,7 @@ import optuna
 from sklearn.datasets import make_classification
 from sklearn.model_selection import train_test_split
 
-from pyspark.sql import SparkSession
+from pyspark.sql import SparkSession # New
 
 from estimator.xgbclassifier import XGBClassifier
 
@@ -77,8 +77,8 @@ spark = SparkSession.builder.appName('my_test').config('spark.jars', '../jar/sca
 x, y = make_classification(n_samples=10_000)
 x = pd.DataFrame(data=x, columns=[f'feature_{i}' for i in range(x.shape[1])])
 xy = x.assign(label=y)
-xy_train, xy_valid = map(spark.createDataFrame, train_test_split(xy, train_size=0.7, random_state=SEED))
-FIXED_PARAM['eval_sets'] = {'eval1': xy_valid}
+xy_train, xy_valid = map(spark.createDataFrame, train_test_split(xy, train_size=0.7, random_state=SEED)) # to Spark
+FIXED_PARAM['eval_sets'] = {'eval1': xy_valid} # Different way of adding 'eval_sets'
 FIXED_PARAM['verbose'] = False
 
 # Create XGBoost classifier spark model
@@ -116,6 +116,7 @@ study.optimize(objective, n_trials=100)
 * For standalone model, `driver memory` is what matters and may impact how much shuffling there could be
 * Other parameters such as `number of partitions` could be further optimized. But I don't really think it's 
   necessary for this project
+* As far as I know, it is preferred to call methods of Spark DataFrame than methods of PythonRDD
 ## Other Notes
 ### HDFS setup
 I followed this [link](https://kontext.tech/article/445/install-hadoop-330-on-windows-10-using-wsl) to set up my local single-node HDFS
