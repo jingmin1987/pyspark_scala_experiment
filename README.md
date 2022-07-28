@@ -13,10 +13,13 @@ enjoyable/interactive is the core motivation to have this toy project. Ideally, 
 experience when switching between Python and Spark backend, with almost the same APIs when building the model. 
 Gradually more functionality could be implemented on demand.
 
-The realization of the idea is to leverage `py4j` and implement the wrapper of xgboost-spark on the Python side. 
-This idea is different from what was implemented in `xgboost-pyspark` which utilizes pyspark.ml. Anyway, I 
-think it is a good fun project to implement it in a different way, and learn how to program across languages and 
-environments  .
+The realization of the idea is to leverage `py4j` and implement some Scala utility functions to facilitate the 
+instantiation of Scala class XGBoostClassifier on the Python side. I later found out that a package called 
+`sparkxgb` is able to leverage `pyspark.ml` which leverages `py4j` to achieve the same result without compiling a 
+custom `jar` file. Nonetheless, isn't reinventing the wheels the best way to learn?
+
+Since this is more or less a toy/explorative project, I may just leave it here for future references (e.g. creating 
+customized Java/Scala classes or functions to use in PySpark)
 
 **Example 1** Using Python backend which is the default, and it should utilize the local resources such as CPU 
 and/or GPU
