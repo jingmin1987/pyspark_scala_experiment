@@ -5,3 +5,6 @@ scikit-learn
 seaborn
 matplotlib
 xgboost
+pytest
+optuna
+plotly
