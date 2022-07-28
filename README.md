@@ -21,6 +21,11 @@ custom `jar` file. Nonetheless, isn't reinventing the wheels the best way to lea
 Since this is more or less a toy/explorative project, I may just leave it here for future references (e.g. creating 
 customized Java/Scala classes or functions to use in PySpark)
 
+## Get started
+* Take a look at the two examples under `notebook/`
+* Scala utility functions are defined in `scala-util` and built to `jar/scala-util.jar`
+* Browse the commit history of this `README.md`. At one point I discussed a bit about codebase design
+
 **Example 1** Using Python backend which is the default, and it should utilize the local resources such as CPU 
 and/or GPU
 ```python
