@@ -5,9 +5,12 @@ from estimator.bridge import JVMConnection
 from util.functions import add_docstring, rename_to_xgb_param, cast_to_scala_type
 
 
-@pytest.fixture()
+@pytest.fixture(scope='session')
 def connection():
-    spark = SparkSession.builder.appName('my_test').config('spark.jars', 'jar/scala-util.jar').getOrCreate()
+    spark = SparkSession\
+        .builder.appName('my_test')\
+        .config('spark.jars', 'jar/scala-util.jar,jar/xgboost4j_2.12-1.6.1.jar,jar/xgboost4j-spark_2.12-1.6.1.jar')\
+        .getOrCreate()
     JVMConnection.set_spark(spark=spark)
     return JVMConnection.get_active()
 
