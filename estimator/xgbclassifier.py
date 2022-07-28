@@ -36,9 +36,9 @@ class XGBClassifier(ModelGateway):
                     # TODO: log
                     pass
                 JVMConnection.set_spark(spark)
-            return XGBClassifierScala(**kwargs)
+            return XGBClassifierSpark(**kwargs)
         else:
-            raise Exception(f'Backend {backend.lower()} not supported. Please choose either "python" or "spark"')
+            raise NotImplementedError(f'Backend {backend} not supported. Please choose either "python" or "spark"')
 
     @classmethod
     def load_model(cls, model_file, *, backend='python', spark=None):
@@ -70,7 +70,7 @@ class XGBClassifier(ModelGateway):
             clf.load_model(model_file)
             return clf
         else:
-            raise Exception(f'Backend {backend.lower()} not supported. Please choose either "python" or "spark"')
+            raise NotImplementedError(f'Backend {backend} not supported. Please choose either "python" or "spark"')
 
 
 @add_docstring(extra_doc=XGB_DOC)
@@ -131,7 +131,7 @@ class XGBClassifierPython(xgb.XGBClassifier, Model):
 
 
 @add_docstring(extra_doc=XGB_DOC)
-class XGBClassifierScala(Model):
+class XGBClassifierSpark(Model):
     """ A class represents XGB implementation in Scala"""
 
     def __init__(self, **kwargs):
@@ -166,7 +166,7 @@ class XGBClassifierScala(Model):
     @property
     def num_tress_built(self):
         """
-        Sometimes it x 3. Maybe due to num_class?
+        If num_class > 2, then it needs to be divided by num_class for a comparable measure
         :return:
         """
         return len(list(self.booster.getModelDump("", False, "text")))
