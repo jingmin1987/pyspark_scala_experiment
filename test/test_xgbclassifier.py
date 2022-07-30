@@ -17,18 +17,12 @@ def test_xgbclassifier_make_exception(connection):
         XGBClassifier.make(backend='julia')
 
 
-# TODO: need to create dummy booster/model files and dataset for testing
 def test_xgbclassifier_load(connection):
-    pass
+    python_booster = XGBClassifier.load_model('booster/python_booster.bin')
+    assert isinstance(python_booster, XGBClassifierPython)
 
+    spark_booster = XGBClassifier.load_model('booster/spark_booster.bin')
+    assert isinstance(spark_booster, XGBClassifierPython)
 
-def test_xgbclassifier_transform(connection):
-    pass
-
-
-def test_xgbclassifier_fit(connection):
-    pass
-
-
-def test_xgbclassifier_predict(connection):
-    pass
+    spark_model = XGBClassifier.load_model('booster/spark_model', backend='spark', spark=connection.spark)
+    assert isinstance(spark_model, XGBClassifierSpark)
