@@ -9,28 +9,32 @@ object Conversion {
   def toMap[A, B](pythonMap: JMap[A, B]): Map[A, B] = pythonMap.asScala.toMap
   def toSet[A](pythonSet: JSet[A]): Set[A] = pythonSet.asScala.toSet
 
-  def testSeq():Seq[Int] = {
+  def isSeq(mySeq: Any): Boolean = mySeq.isInstanceOf[Seq[_]]
+  def isMap(myMap: Any): Boolean = myMap.isInstanceOf[Map[_, _]]
+  def isSet(mySet: Any): Boolean = mySet.isInstanceOf[Set[_]]
+
+  def testSeq():Unit = {
     val javaArrayList = new util.ArrayList[Int](Seq(1, 2).asJava)
-    toSeq(javaArrayList)
+    assert(isSeq(toSeq(javaArrayList)))
 
     val javaLinkedList = new util.LinkedList[Int](Seq(1, 2).asJava)
-    toSeq(javaLinkedList)
+    assert(isSeq(toSeq(javaLinkedList)))
   }
 
-  def testMap(): Map[String, Int] = {
+  def testMap(): Unit = {
     val javaMap = new java.util.HashMap[String, Int] {
       put("first", 1)
       put("second", 2)
     }
-    toMap(javaMap)
+    assert(isMap(toMap(javaMap)))
   }
 
-  def testSet(): Set[Int] = {
+  def testSet(): Unit = {
     val javaSet = new java.util.HashSet[Int]()
     javaSet.add(1)
     javaSet.add(2)
     javaSet.add(1)
-    toSet(javaSet)
+    assert(isSet(toSet(javaSet)))
   }
 
   def main(args: Array[String]): Unit = {

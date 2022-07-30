@@ -68,22 +68,18 @@ def test_rename_to_xgb_param():
 
 
 def test_cast_to_scala_type(connection):
-    # I don't have a good way to test scala_list is a Seq
     python_list = [1, 2, 3]
     scala_seq = cast_to_scala_type(python_list)
-    for i in range(len(python_list)):
-        assert scala_seq.apply(i) == python_list[i]
+    assert connection.util.isSeq(scala_seq)
 
     python_tuple = (1, 2, 3)
     scala_seq = cast_to_scala_type(python_tuple)
-    for i in range(len(python_tuple)):
-        assert scala_seq.apply(i) == python_tuple[i]
+    assert connection.util.isSeq(scala_seq)
 
     python_dict = {'one': 1}
     scala_map = cast_to_scala_type(python_dict)
-    assert scala_map.apply('one') == python_dict['one']
-    assert scala_map.toString() == 'Map(one -> 1)'
+    assert connection.util.isMap(scala_map)
 
     python_set = {1, 2, 1}
     scala_set = cast_to_scala_type(python_set)
-    assert scala_set.toString() == 'Set(1, 2)'
+    assert connection.util.isSet(scala_set)
